@@ -10,13 +10,18 @@ import (
 type Chakra[T any] struct {
 	mu          sync.Mutex
 	subscribers map[string]map[chan *T]struct{}
+	limit int
 }
 
 // New returns new chakra of single buffer
 // single for fast process 😄
-func New[T any]() *Chakra[T] {
+func New[T any](limit int) *Chakra[T] {
+	if limit==0{
+		limit=1
+	}
 	return &Chakra[T]{
-		subscribers: make(map[string]map[chan *T]struct{}, 1),
+		subscribers: make(map[string]map[chan *T]struct{}, limit),
+		limit:limit
 	}
 }
 
@@ -26,7 +31,7 @@ func (l *Chakra[T]) Subscribe(key string) chan *T {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	if _, ok := l.subscribers[key]; !ok {
-		l.subscribers[key] = make(map[chan *T]struct{}, 1)
+		l.subscribers[key] = make(map[chan *T]struct{}, l.limit)
 	}
 	l.subscribers[key][ch] = struct{}{}
 	return ch
