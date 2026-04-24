@@ -21,7 +21,7 @@ func New[T any](limit int) *Chakra[T] {
 	}
 	return &Chakra[T]{
 		subscribers: make(map[string]map[chan *T]struct{}, limit),
-		limit:limit
+		limit:limit,
 	}
 }
 
